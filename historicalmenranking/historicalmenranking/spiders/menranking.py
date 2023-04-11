@@ -17,20 +17,23 @@ class MenrankingSpider(scrapy.Spider):
             date_text = item_id['text'].replace('Sept', 'sep')
             date_obj = datetime.strptime(date_text, '%d %b %Y')
             date = date_obj.strftime('%Y-%m-%d')
-            yield scrapy.Request(url=url, callback=self.parse_ranking_data, meta={'url': url,'date':date})
+            yield scrapy.Request(url=url, callback=self.parse_ranking_data, meta={'date':date})
 
     def parse_ranking_data(self, response):
-        data = json.loads(response.body)
+        data = json.loads(response.body) 
+        base_url = 'https://www.fifa.com'
         for ranking_data in data['rankings']:
             yield {
-                'url' : response.meta['url'],
                 'date': response.meta['date'],
-                'team': ranking_data['rankingItem']['name'],
+                'country': ranking_data['rankingItem']['name'],
                 'rank': ranking_data['rankingItem']['rank'],
+                'previousRank' : ranking_data['rankingItem']['previousRank'],
                 'totalPoints': ranking_data['rankingItem']['totalPoints'],
+                'previousPoints': ranking_data['previousPoints'],
                 'flagUrl': ranking_data['rankingItem']['flag']['src'],
-                'conf': ranking_data['tag']['text'] # or id
-          }
+                'countryUrl': base_url + ranking_data['rankingItem']['countryURL'],
+                'conf': ranking_data['tag']['text'] 
+            }
 
             
  
